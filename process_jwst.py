@@ -1,10 +1,11 @@
 # Script to process JWST data
 from astropy.time import Time
+from sqlalchemy import create_engine 
 from fetch_data import fetch_obspointing
 from moc_utils import add_moc_column, create_union_moc
 from plot import plot_moc
-from sqlalchemy import create_engine 
 
+mission = 'JWST'
 
 # Convert time to MJD
 times = ['2023-06-01', '2023-07-01']
@@ -12,7 +13,7 @@ t = Time(times)
 print(t.mjd)
 
 # Get data from TAP
-df = fetch_obspointing('JWST',
+df = fetch_obspointing(mission,
                  f'AND t_min >= {t.mjd[0]} AND t_max < {t.mjd[1]}')
 print(df)
 
