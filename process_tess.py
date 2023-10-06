@@ -1,10 +1,9 @@
-# Script to process JWST data
+# Script to process TESS data
 from astropy.time import Time
+from sqlalchemy import create_engine
 from fetch_data import fetch_obspointing
-from mocpy import MOC
-import matplotlib.pyplot as plt
-
 from moc_utils import add_moc_column, create_union_moc
+from plot import plot_moc
 
 mission = 'TESS'
 
@@ -21,22 +20,19 @@ print(df)
 df = add_moc_column(df)
 print(df)
 
+# Store in database
+connection_string = 'sqlite:///mast_moc.db'
+engine = create_engine(connection_string)
+# can use if_exists='append' to add to table
+no_coords = [x for x in df.columns if x!='coords']  # need to eliminate coords since it has Quantity objects
+df[no_coords].to_sql(name='obspointing', con=engine, if_exists='append', index=False)
+
+
+# Union the mocs
 moc = create_union_moc(df)
 
-# Plot the MOC using matplotlib
-fig = plt.figure(111, figsize=(15, 10))
-# Define a astropy WCS easily
-wcs = moc.wcs(fig, coordsys="icrs", projection="AIT")
-ax = fig.add_subplot(1, 1, 1, projection=wcs)
-# Call fill with a matplotlib axe and the `~astropy.wcs.WCS` wcs object.
-moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
-moc.border(ax=ax, wcs=wcs, alpha=0.5, color="black")
-plt.xlabel("ra")
-plt.ylabel("dec")
-plt.title(f"Coverage of {mission}, June 2023")
-plt.grid(color="black", linestyle="dotted")
-plt.show()
-
+# Save the union MOC
 moc.save(f'{mission.lower()}_mission_moc.fits', overwrite=True)
 
-
+# Plot the MOC using matplotlib
+plot_moc(moc)
