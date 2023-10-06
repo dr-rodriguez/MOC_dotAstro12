@@ -1,6 +1,8 @@
 # Utility functions for handling MOCs
+import pandas as pd
 import astropy.units as u
 from mocpy import MOC
+from sqlalchemy import create_engine
 from sregion import parse_s_region
 
 MAX_DEPTH = 9
@@ -35,3 +37,18 @@ def create_union_moc(df, format='json'):
     for i in moc_list[1:]:
         moc = moc.union(i)
     return moc
+
+
+def get_db():
+    """ get the sqlite obspointing db """
+    connection_string = 'sqlite:///mast_moc.db'
+    engine = create_engine(connection_string)
+    return pd.read_sql('select * from obspointing', engine)
+
+
+def get_obs_id(moc):
+    """ get the obsservation ids that intersect with the input moc """
+    db = get_db()
+    moclist = [MOC.from_string(i, format='json') for i in db['moc']]
+    sub = [e for e, i in enumerate(moclist) if not moc.intersection(i).empty()]
+    return db.iloc[sub][['obs_id', 's_ra', 's_dec']]
