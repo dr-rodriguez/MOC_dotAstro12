@@ -1,5 +1,6 @@
 # Utility functions for working with sregion
 import numpy as np
+import astropy.units as u
 from astropy.visualization.wcsaxes.patches import _rotate_polygon
 
 
@@ -38,9 +39,9 @@ def parse_s_region(s_region):
             except ValueError:
                 continue
             if counter % 2 == 0:
-                ra.append(value)
+                ra.append(value * u.deg)
             else:
-                dec.append(value)
+                dec.append(value * u.deg)
             counter += 1
     elif s_region.split()[0].upper() == 'CIRCLE':
         center_ra, center_dec, radius = None, None, None
