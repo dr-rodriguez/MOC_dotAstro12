@@ -1,7 +1,6 @@
 # Utility functions for handling MOCs
 import astropy.units as u
 from mocpy import MOC
-import matplotlib.pyplot as plt
 from sregion import parse_s_region
 
 MAX_DEPTH = 9
@@ -24,21 +23,15 @@ def add_moc_column(df):
     return df
 
 
-def plot_moc(moc):
-    """ Plot a MOC object """
-    # Plot the MOC using matplotlib
-    fig = plt.figure(figsize=(10, 10))
-    wcs = moc.wcs(fig)
-    ax = fig.add_subplot(projection=wcs)
-    moc.border(ax, wcs, color='blue')
-
-
-def create_union_moc(df):
+def create_union_moc(df, format='json'):
     """ Create a MOC union from a list of MOCs"""
-    moc = df['moc'].iloc[0]
-    for i in df['moc']:
+
+    if format=='json':
+        moc_list = [MOC.from_string(i, format='json') for i in df['moc'].tolist()]
+    else:
+        moc_list = df['moc'].tolist()
+
+    moc = moc_list[0]
+    for i in moc_list[1:]:
         moc = moc.union(i)
     return moc
-
-
-
