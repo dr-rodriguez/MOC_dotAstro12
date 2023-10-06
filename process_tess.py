@@ -37,4 +37,6 @@ plt.title(f"Coverage of {mission}, June 2023")
 plt.grid(color="black", linestyle="dotted")
 plt.show()
 
-moc.save(f'{mission.lower()}_mission_moc.fits', ovewrite=True)
+moc.save(f'{mission.lower()}_mission_moc.fits', overwrite=True)
+
+
