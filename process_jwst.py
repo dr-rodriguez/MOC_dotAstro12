@@ -3,6 +3,7 @@ from astropy.time import Time
 from fetch_data import fetch_obspointing
 from moc_utils import add_moc_column, create_union_moc
 from plot import plot_moc
+from sqlalchemy import create_engine 
 
 
 # Convert time to MJD
@@ -20,15 +21,11 @@ df = add_moc_column(df)
 print(df)
 
 # Store in database
-from sqlalchemy import create_engine 
-connection_string = 'sqlite:///caom.db'
+connection_string = 'sqlite:///mast_moc.db'
 engine = create_engine(connection_string)
-df.to_sql('caom', engine)
-
-# Plot the MOCs
-from mocpy import MOC
-import matplotlib.pyplot as plt
-moc_list = [MOC.from_string(i, format='json') for i in df['moc'].tolist()]
+# can use if_exists='append' to add to table
+no_coords = [x for x in df.columns if x!='coords']  # need to eliminate coords since it has Quantity objects
+df[no_coords].to_sql(name='obspointing', con=engine, if_exists='replace', index=False)
 
 # Union the mocs
 moc = create_union_moc(df, format='json')
