@@ -19,6 +19,7 @@ def plot_moc(moc):
 
 
 def plot_unions(mocs: list, missions: list = []):
+    """ Plot the unions / intersections between a set of MOCs """
 
     # Compute their union and intersection
     inter = mocs[0]
