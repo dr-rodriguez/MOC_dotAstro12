@@ -1,6 +1,6 @@
 # Script to process TESS data
 from astropy.time import Time
-from sqlalchemy import create_engine 
+from sqlalchemy import create_engine
 from fetch_data import fetch_obspointing
 from moc_utils import add_moc_column, create_union_moc
 from plot import plot_moc
