@@ -12,7 +12,7 @@ def get_polygon_moc(row):
     lon = u.Quantity(row['coords']['ra'])
     lat = u.Quantity(row['coords']['dec'])
     temp_moc = MOC.from_polygon(lon, lat, max_depth=MAX_DEPTH)
-    return temp_moc
+    return temp_moc.to_string(format='json')
 
 
 def add_moc_column(df):
