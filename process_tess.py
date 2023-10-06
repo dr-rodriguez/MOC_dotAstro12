@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from moc_utils import add_moc_column, create_union_moc
 
-mission = 'JWST'
+mission = 'TESS'
 
 # Convert time to MJD
 times = ['2023-06-01', '2023-07-01']
@@ -15,12 +15,11 @@ print(t.mjd)
 
 # Get data from TAP
 df = fetch_obspointing(mission,
-                 f'AND t_min >= {t.mjd[0]} AND t_max < {t.mjd[1]}')
+                 f"AND t_min >= {t.mjd[0]} AND t_max < {t.mjd[1]} AND dataproduct_type = 'image'")
 print(df)
 
 df = add_moc_column(df)
 print(df)
-
 
 moc = create_union_moc(df)
 
