@@ -73,3 +73,36 @@ def plot_unions(mocs: list, missions: list = []):
     plt.title(f"Logical operations between {', '.join(missions)}")
     plt.grid(color="black", linestyle="dotted")
     plt.show()
+
+
+def plot_moc_with_targets(moc, df, save=None):
+    """ Plot a MOC object adding targets from a dataframe """
+
+    fig = plt.figure(figsize=(10, 10))
+    wcs = moc.wcs(fig, coordsys="icrs", projection="AIT")
+    ax = fig.add_subplot(1, 1, 1, projection=wcs)
+
+    # The MOC itself
+    moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
+    moc.border(ax=ax, wcs=wcs, alpha=0.5, color="black")
+
+    # The dataframe rows
+    for i, row in df.iterrows():
+        # ax.annotate(row['obs_id'], (row['s_ra'], row['s_dec']))
+        # ax.text(row['s_ra'], row['s_dec'], row['obs_id'])
+        x, y = wcs.world_to_pixel(SkyCoord(ra=row['s_ra'] * u.deg, dec=row['s_dec'] * u.deg))
+        ax.text(x, y, row['obs_id'])
+        if row['obs_id'].startswith('tess'):
+            continue
+        else:
+            ax.plot(x, y, 'k.')
+
+    plt.xlabel("ra")
+    plt.ylabel("dec")
+    plt.grid(color="black", linestyle="dotted")
+    
+    if save:
+        plt.savefig(save)
+    else:
+        plt.show()
+
