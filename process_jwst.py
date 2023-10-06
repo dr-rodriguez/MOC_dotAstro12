@@ -20,7 +20,10 @@ print(df)
 from mocpy import MOC
 import matplotlib.pyplot as plt
 moc_list = [MOC.from_string(i, format='json') for i in df['moc'].tolist()]
-moc = MOC.union(*moc_list[:2])
+
+moc = moc_list[0]
+for t in moc_list[1:]:
+    moc = moc.union(t)
 
 # Plot the MOC using matplotlib
 fig = plt.figure(111, figsize=(15, 10))
