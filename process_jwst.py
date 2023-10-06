@@ -31,5 +31,8 @@ df[no_coords].to_sql(name='obspointing', con=engine, if_exists='replace', index=
 # Union the mocs
 moc = create_union_moc(df, format='json')
 
+# Save the union MOC
+moc.save(f'{mission.lower()}_mission_moc.fits', overwrite=True)
+
 # Plot the MOC using matplotlib
 plot_moc(moc)
