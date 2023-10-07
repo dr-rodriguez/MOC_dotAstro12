@@ -75,27 +75,35 @@ def plot_unions(mocs: list, missions: list = []):
     plt.show()
 
 
-def plot_moc_with_targets(moc, df, save=None):
+def plot_moc_with_targets(moc, df, intersect_moc=None, save=None):
     """ Plot a MOC object adding targets from a dataframe """
 
     fig = plt.figure(figsize=(10, 10))
-    wcs = moc.wcs(fig, coordsys="icrs", projection="AIT")
-    ax = fig.add_subplot(1, 1, 1, projection=wcs)
+    with WCS(
+        fig,
+        fov=360 * u.deg,
+        center=SkyCoord(0, 0, unit="deg", frame="icrs"),
+        coordsys="icrs",
+        rotation=Angle(0, u.degree),
+        projection="AIT",
+    ) as wcs:
+        # wcs = moc.wcs(fig, coordsys="icrs", projection="AIT",
+        #               rotation=Angle(0, u.degree),)
+        ax = fig.add_subplot(1, 1, 1, projection=wcs)
 
-    # The MOC itself
-    moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
-    moc.border(ax=ax, wcs=wcs, alpha=0.5, color="black")
+        # The MOC itself
+        moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="green")
+        moc.border(ax=ax, wcs=wcs, alpha=0.5, color="black")
 
-    # The dataframe rows
-    for i, row in df.iterrows():
-        # ax.annotate(row['obs_id'], (row['s_ra'], row['s_dec']))
-        # ax.text(row['s_ra'], row['s_dec'], row['obs_id'])
-        x, y = wcs.world_to_pixel(SkyCoord(ra=row['s_ra'] * u.deg, dec=row['s_dec'] * u.deg))
-        ax.text(x, y, row['obs_id'])
-        if row['obs_id'].startswith('tess'):
-            continue
-        else:
-            ax.plot(x, y, 'k.')
+        # Intersection moc
+        if intersect_moc is not None:
+            intersect_moc.fill(ax=ax, wcs=wcs, alpha=0.5, fill=True, color="red")
+            intersect_moc.border(ax=ax, wcs=wcs, alpha=1, color="red")
+
+        # The dataframe rows
+        for _, row in df.iterrows():
+            x, y = wcs.world_to_pixel(SkyCoord(ra=row['s_ra'] * u.deg, dec=row['s_dec'] * u.deg))
+            ax.text(x, y, row['obs_id'])
 
     plt.xlabel("ra")
     plt.ylabel("dec")
