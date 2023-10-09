@@ -7,22 +7,28 @@ from sqlalchemy import create_engine
 from sregion import parse_s_region
 
 MAX_DEPTH = 9
+TIME_DEPTH = 40  # 61 is 1microsecond, 23 is 3 days
+# Not clear what DEPTH (mocpy) is in relation to ORDER (ivoa docs)
 
 
 def get_polygon_moc(row):
-    # print('{} ({} {}) {}'.format(row['obs_id'], row['s_ra'], row['s_dec'], row['s_region']))
+    """Construct a MOC"""
     lon = u.Quantity(row['coords']['ra'])
     lat = u.Quantity(row['coords']['dec'])
     temp_moc = MOC.from_polygon(lon, lat, max_depth=MAX_DEPTH)
     return temp_moc.to_string(format='json')
 
 
-def create_stmoc(row):
-    """ create an STMOC for a single row in the db """
+def make_stmoc(row):
+    """Construct STMOC"""
     moc = MOC.from_string(row['moc'], format='json')
-    return STMOC.from_spatial_coverages(Time([row['t_min']], format='mjd'),
-                                        Time([row['t_max']], format='mjd'),
-                                        [moc]).to_string(format='json')
+    times_start = Time([row['t_min']], format='mjd')
+    times_end = Time([row['t_max']], format='mjd')
+    stmoc = STMOC.from_spatial_coverages(times_start=times_start,
+                                         times_end=times_end,
+                                         spatial_coverages=[moc],
+                                         time_depth=TIME_DEPTH)
+    return stmoc.to_string(format='json')
 
 
 def add_moc_column(df):
@@ -30,7 +36,7 @@ def add_moc_column(df):
 
     df['coords'] = df.apply(lambda x: parse_s_region(x['s_region']), axis=1)
     df['moc'] = df.apply(get_polygon_moc, axis=1)
-    df['stmoc'] = df.apply(create_stmoc, axis=1)
+    df['stmoc'] = df.apply(make_stmoc, axis=1)
 
     return df
 

@@ -33,4 +33,4 @@ result = df.iloc[moc_ind][['obs_id', 's_ra', 's_dec']]
 print(result)
 
 # Plot alongside MOC intersection
-plot_moc_with_targets(tess, result, save='june2023.png')
+plot_moc_with_targets(tess, result, intersect_moc=moc, save='june2023_v2.png')
